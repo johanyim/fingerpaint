@@ -40,6 +40,8 @@ fn main() {
     let cat = qolor::palette::Palette::load("Catppuccin").expect("loading");
     println!("this is what I've got :{}",cat.colors.get(&'q').unwrap());
 
+    // println!("get function {}", cat.get_color('q'));
+    println!("get function {}", cat.get_color('w'));
 
         
 

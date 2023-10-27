@@ -36,26 +36,23 @@ impl Palette {
         Ok(())
     }
 
-
     pub fn load(palletename: &str) -> Result<Palette, std::io::Error> {
         let filename = filenamify(palletename) + &".yaml";
         
-        let file = fs::File::open(filename).expect("Could not find file of name {filename}");
-
+        let file = fs::File::open(filename).expect("Could not find file");
         let reader = BufReader::new(file);
 
         let loaded: Palette = serde_yaml::from_reader::<_, Palette>(reader)
             .expect("Could not read file");
 
         return Ok(loaded);
-
-
-        
-        
-
     } 
-    
 
+
+    pub fn get_color(self, key: char) -> String {
+        return self.colors.get(&key).unwrap().to_string();
+    
+    }
 }
 
 
