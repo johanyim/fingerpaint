@@ -13,6 +13,4 @@ mod tests {
 
         assert_eq!(ctx.get_contents().unwrap(), to_copy.to_string());
     }
-
-
 }

@@ -1,0 +1,14 @@
+name: Catppuccin
+colors:
+  'q': !HEX
+  - 17
+  - 17
+  - 27
+  'e': !HSL
+  - 17
+  - 17
+  - 27
+  'w': !RGB
+  - 0
+  - 17
+  - 27
