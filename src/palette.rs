@@ -8,14 +8,16 @@ use serde::{Serialize,Deserialize};
 use std::fs;
 
 use std::collections::HashMap;
-use std::io::{Write, BufReader};
-use crate::color::Color;
+use std::io::{Write, BufReader, Error};
+use csscolorparser;
+
+use crate::color::{self, Color};
 
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Palette {
     pub name: String,
-    pub colors: HashMap<char, Color>,
+    pub colors: HashMap<char, color::Color>,
 }
 
 
@@ -31,6 +33,7 @@ impl Palette {
         let safe_filename = filenamify(self.name.clone()) + &".yaml";
         let mut output = fs::File::create(safe_filename)?;
         let yaml = serde_yaml::to_string(&self).unwrap();
+        
         // write!(output, "{}", yaml) 
         output.write_all(&yaml.into_bytes())?;
         Ok(())
@@ -49,13 +52,22 @@ impl Palette {
     } 
 
 
-    pub fn get_color(self, key: char) -> String {
-        return self.colors.get(&key).unwrap().to_string();
-    
+    pub fn add(&mut self, key: char, color: &str ) -> Result<(), Error>{
+        //ensure all colors are uniformly stored as rgb
+
+        let col = Color::new("unnamed", color);
+
+        self.colors.insert(key, col);
+        Ok(())
+    }
+
+
+    pub fn get_color(self, key: char) -> Option<String>{
+        let color = self.colors.get(&key)
+            .expect("Expected a color");
+        return Some(color.to_string());
     }
 }
-
-
 
 
 

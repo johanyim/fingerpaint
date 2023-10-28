@@ -1,0 +1,18 @@
+name: KittyColors
+colors:
+  'w':
+    name: unnamed
+    output_format: HEX
+    hex_color: '#00ff0000'
+  'a':
+    name: unnamed
+    output_format: HEX
+    hex_color: '#00ff0000'
+  'q':
+    name: unnamed
+    output_format: RGB
+    hex_color: '#00ff0000'
+  'r':
+    name: unnamed
+    output_format: HEX
+    hex_color: '#00ff0000'
