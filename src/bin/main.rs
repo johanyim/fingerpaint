@@ -1,8 +1,7 @@
 use copypasta_ext::prelude::*;
 use copypasta_ext::x11_fork::ClipboardContext;
+use qolor::color;
 use std::collections::HashMap;
-// use qolor::color::Color;
-// use qolor::color_file_reader::find_color_by_key;
 use std::fs;
 
 use csscolorparser::Color;
@@ -22,30 +21,59 @@ use qolor::palette::Palette;
 //      exits when a key is pressed
 fn main() {
 
-    
-    let mut cat = Palette::new("KittyColors"); 
-    
-
-
     let c = "#0f00".parse::<Color>().unwrap();
+
+    let mut cat = Palette::new("KittyColors"); 
     // println!("{}", c.to_hex_string());
 
-    // cat.add('q', &c.to_hex_string()); 
-    // cat.add('w', &c.to_hex_string()); 
-    // cat.add('r', &c.to_hex_string()); 
-    // cat.add('a', &c.to_hex_string()); 
-    // cat.save();
+    cat.add('q',
+            "green",
+            color::Format::HEX,
+            &c.to_hex_string()
+            ); 
+    cat.add('w',
+            "cyan",
+            color::Format::HEXA,
+            "00ffff"
+            ); 
+    cat.add('e',
+            "magenta",
+            color::Format::RGB,
+            "magenta"
+            ); 
+    cat.add('r',
+            "red",
+            color::Format::RGBA,
+            "ff000088"
+            ); 
+    cat.add('t',
+            "glass",
+            color::Format::RGBA,
+            "transparent"
+            ); 
+    cat.save();
 
 
     let loaded_cat: Palette = Palette::load("KittyColors").unwrap();
+    println!("HEX  q: {}", loaded_cat.get_color('q').unwrap());
+    let loaded_cat: Palette = Palette::load("KittyColors").unwrap();
+    println!("HEXA w: {}", loaded_cat.get_color('w').unwrap());
+    let loaded_cat: Palette = Palette::load("KittyColors").unwrap();
+    println!("RGB  e: {}", loaded_cat.get_color('e').unwrap());
+    let loaded_cat: Palette = Palette::load("KittyColors").unwrap();
+    println!("RGBA r: {}", loaded_cat.get_color('r').unwrap());
+    let loaded_cat: Palette = Palette::load("KittyColors").unwrap();
+    println!("RGBA t: {}", loaded_cat.get_color('t').unwrap());
+    // let loaded_cat: Palette = Palette::load("KittyColors").unwrap();
+    // println!("RGBA y: {}", loaded_cat.get_color('y').unwrap());
+    
 
-    println!("{}", loaded_cat.get_color('q').unwrap());
-
-
+    let loaded_cat: Palette = Palette::load("KittyColors").unwrap();
+    let color = loaded_cat.get_color('q').unwrap();
 
     //copied to clipboard
-    // let mut ctx = ClipboardContext::new().unwrap();
-    // ctx.set_contents(color).unwrap();
+    let mut ctx = ClipboardContext::new().unwrap();
+    ctx.set_contents(color).unwrap();
 
     //exit gui
 }

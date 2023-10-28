@@ -9,7 +9,6 @@ use std::fs;
 
 use std::collections::HashMap;
 use std::io::{Write, BufReader, Error};
-use csscolorparser;
 
 use crate::color::{self, Color};
 
@@ -22,13 +21,11 @@ pub struct Palette {
 
 
 impl Palette {
-    //makes a new file?
     pub fn new(name: &str) -> Self {
         let colors: HashMap<char, Color> = HashMap::new();
         return Palette{name: name.to_string(), colors};
     }
     
-    //write out to file
     pub fn save(self) -> std::io::Result<()> {
         let safe_filename = filenamify(self.name.clone()) + &".yaml";
         let mut output = fs::File::create(safe_filename)?;
@@ -52,21 +49,21 @@ impl Palette {
     } 
 
 
-    pub fn add(&mut self, key: char, color: &str ) -> Result<(), Error>{
-        //ensure all colors are uniformly stored as rgb
-
-        let col = Color::new("unnamed", color);
+    pub fn add(&mut self, key: char, name: &str, format: color::Format, color: &str ) -> Result<(), Error>{
+        let col = Color::new(name, format, color);
 
         self.colors.insert(key, col);
         Ok(())
     }
 
-
-    pub fn get_color(self, key: char) -> Option<String>{
+    
+    //if returned None, prompt user for new color
+    pub fn get_color(&self, key: char) -> Option<String>{
         let color = self.colors.get(&key)
             .expect("Expected a color");
         return Some(color.to_string());
     }
+
 }
 
 

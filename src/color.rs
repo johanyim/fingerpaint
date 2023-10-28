@@ -9,18 +9,18 @@ use csscolorparser;
 pub struct Color{
     pub name: String, 
     pub output_format: Format,
-    pub hex_color: String, 
+    pub rgba_color: [u8; 4], 
 }
 
 impl Color {
-    pub fn new(name: &str, color: &str) -> Self{
+    pub fn new(name: &str, format: Format, color: &str) -> Self{
         
         return Color{
             name: name.to_string(),
-            output_format: Format::HEX,
-            hex_color: csscolorparser::parse(color)
+            output_format: format,
+            rgba_color: csscolorparser::parse(color)
                 .expect("couldn't parse color")
-                .to_hex_string(), 
+                .to_rgba8(), 
 
         }
     }
@@ -28,18 +28,16 @@ impl Color {
 
 #[derive(Debug, Serialize, Deserialize)]
 pub enum Format {
-    RGB, HEX, HSL,
+    RGB,RGBA,HEX,HEXA,HSL,
 }
 impl fmt::Display for Color {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self.output_format {
-            Format::HEX => write!(f, "{}", self.hex_color),
-            Format::RGB => write!(f, "{}", 
-                                  csscolorparser::parse(&self.hex_color)
-                                  .unwrap()
-                                  .to_rgb_string() 
-                                  ),
-            _ => write!(f, "other format"),
+            Format::RGB => write!(f, "rgb({},{},{})", self.rgba_color[0], self.rgba_color[1], self.rgba_color[2]),
+            Format::RGBA => write!(f, "rgba({},{},{},{})", self.rgba_color[0], self.rgba_color[1], self.rgba_color[2], self.rgba_color[3]),
+            Format::HEX => write!(f, "#{:02x}{:02x}{:02x}", self.rgba_color[0], self.rgba_color[1], self.rgba_color[2]),
+            Format::HEXA => write!(f, "#{:02x}{:02x}{:02x}{:02x}", self.rgba_color[0], self.rgba_color[1], self.rgba_color[2], self.rgba_color[3]),
+            _ => write!(f, "Format unknown, please check format of color"),
         }
     }
 }

@@ -1,18 +1,42 @@
 name: KittyColors
 colors:
-  'w':
-    name: unnamed
-    output_format: HEX
-    hex_color: '#00ff0000'
-  'a':
-    name: unnamed
-    output_format: HEX
-    hex_color: '#00ff0000'
+  't':
+    name: glass
+    output_format: RGBA
+    rgba_color:
+    - 0
+    - 0
+    - 0
+    - 0
   'q':
-    name: unnamed
-    output_format: RGB
-    hex_color: '#00ff0000'
-  'r':
-    name: unnamed
+    name: green
     output_format: HEX
-    hex_color: '#00ff0000'
+    rgba_color:
+    - 0
+    - 255
+    - 0
+    - 0
+  'e':
+    name: magenta
+    output_format: RGB
+    rgba_color:
+    - 255
+    - 0
+    - 255
+    - 255
+  'w':
+    name: cyan
+    output_format: HEXA
+    rgba_color:
+    - 0
+    - 255
+    - 255
+    - 255
+  'r':
+    name: red
+    output_format: RGBA
+    rgba_color:
+    - 255
+    - 0
+    - 0
+    - 136
