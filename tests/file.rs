@@ -1,8 +1,8 @@
 #[cfg(test)]
 mod tests {
-    use qolor::palette::Palette;
-
-    use super::*;
+    // use qolor::palette::Palette;
+    //
+    // use super::*;
 
     // #[test]
     // fn correct_naming() {

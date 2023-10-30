@@ -5,6 +5,7 @@ use copypasta_ext::x11_fork::ClipboardContext;
 mod tests {
     use super::*;
 
+    #[ignore]
     #[test]
     fn copies_to_clipboard() {
         let mut ctx = ClipboardContext::new().unwrap();

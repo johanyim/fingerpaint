@@ -8,17 +8,15 @@ use serde::{Serialize,Deserialize};
 use std::fs;
 
 use std::collections::HashMap;
-use std::io::{Write, BufReader, Error};
+use std::io::{Write, BufReader};
 
-use crate::color::{self, Color};
-
+use crate::color::{self, Color, Format};
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Palette {
     pub name: String,
     pub colors: HashMap<char, color::Color>,
 }
-
 
 impl Palette {
     pub fn new(name: &str) -> Self {
@@ -48,21 +46,47 @@ impl Palette {
         return Ok(loaded);
     } 
 
-
-    pub fn add(&mut self, key: char, name: &str, format: color::Format, color: &str ) -> Result<(), Error>{
+    pub fn add(&mut self, key: char, name: &str, format: color::Format, color: &str ){
         let col = Color::new(name, format, color);
-
-        self.colors.insert(key, col);
-        Ok(())
+        match col {
+            Ok(color) => {self.colors.insert(key, color); return},
+            Err(e) => {eprintln!("{e}: '{color}' was not a valid color")},
+        };
     }
-
     
     //if returned None, prompt user for new color
-    pub fn get_color(&self, key: char) -> Option<String>{
-        let color = self.colors.get(&key)
-            .expect("Expected a color");
-        return Some(color.to_string());
+    pub fn get_string(&self, key: char) -> String {
+        let value = self.colors.get(&key);
+        match value {
+            Some(color) => color.to_string(),
+            None => "#000000".to_string(), 
+        }    
     }
+
+    pub fn get_name(&self, key: char) -> String {
+        let value = self.colors.get(&key);
+        match value {
+            Some(color) => color.name.to_string(),
+            None => "Unassigned".to_string(), 
+        }    
+    }
+
+    pub fn remove(&mut self, key: char) -> Option<Color>{
+        self.colors.remove(&key)
+    }
+
+    pub fn change_format(&mut self, key: char, format: Format) {
+        if let Some(color) = self.colors.get_mut(&key) {
+             color.output_format = format 
+        }
+    }
+
+    pub fn delete_alpha(&mut self, key: char) {
+        if let Some(color) = self.colors.get_mut(&key) {
+            color.rgba_color[3] = 255;
+        }
+    }
+
 
 }
 
