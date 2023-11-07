@@ -54,6 +54,14 @@ impl Palette {
         };
     }
     
+    pub fn get_name(&self, key: char) -> String {
+        let value = self.colors.get(&key);
+        match value {
+            Some(color) => color.name.to_string(),
+            None => "Unassigned".to_string(), 
+        }    
+    }
+    
     //if returned None, prompt user for new color
     pub fn get_string(&self, key: char) -> String {
         let value = self.colors.get(&key);
@@ -63,11 +71,11 @@ impl Palette {
         }    
     }
 
-    pub fn get_name(&self, key: char) -> String {
+    pub fn get_rgba(&self, key: char) -> [u8;4] {
         let value = self.colors.get(&key);
         match value {
-            Some(color) => color.name.to_string(),
-            None => "Unassigned".to_string(), 
+            Some(color) => color.rgba_color,
+            None => [0,0,0,0], 
         }    
     }
 

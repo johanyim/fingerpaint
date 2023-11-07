@@ -53,8 +53,6 @@ impl Color {
         let c_max: f32 = (std::cmp::max(std::cmp::max(r8,g8),b8) as f32) / 255f32;
         let c_min: f32 = (std::cmp::min(std::cmp::min(r8,g8),b8) as f32) / 255f32;
 
-        println!("max={}, min={}",c_max, c_min);
-
         let delta = (c_max - c_min).abs();
         
         let hue = 

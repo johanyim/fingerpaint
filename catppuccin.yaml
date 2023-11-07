@@ -1,0 +1,210 @@
+name: catppuccin
+colors:
+  'z':
+    name: surface2
+    output_format: HEX
+    rgba_color:
+    - 88
+    - 91
+    - 112
+    - 255
+  'n':
+    name: crust
+    output_format: HEX
+    rgba_color:
+    - 17
+    - 17
+    - 27
+    - 255
+  'x':
+    name: surface1
+    output_format: HEX
+    rgba_color:
+    - 69
+    - 71
+    - 90
+    - 255
+  'f':
+    name: lavender
+    output_format: HEX
+    rgba_color:
+    - 180
+    - 190
+    - 254
+    - 255
+  'r':
+    name: mauve
+    output_format: HEX
+    rgba_color:
+    - 203
+    - 166
+    - 247
+    - 255
+  'i':
+    name: yellow
+    output_format: HEX
+    rgba_color:
+    - 249
+    - 226
+    - 175
+    - 255
+  'k':
+    name: overlay2
+    output_format: HEX
+    rgba_color:
+    - 147
+    - 153
+    - 178
+    - 255
+  'y':
+    name: maroon
+    output_format: HEX
+    rgba_color:
+    - 235
+    - 160
+    - 172
+    - 255
+  'u':
+    name: peach
+    output_format: HEX
+    rgba_color:
+    - 250
+    - 179
+    - 135
+    - 255
+  'o':
+    name: green
+    output_format: HEX
+    rgba_color:
+    - 166
+    - 227
+    - 161
+    - 255
+  'p':
+    name: teal
+    output_format: HEX
+    rgba_color:
+    - 148
+    - 226
+    - 213
+    - 255
+  'e':
+    name: pink
+    output_format: HEX
+    rgba_color:
+    - 245
+    - 194
+    - 231
+    - 255
+  'w':
+    name: flamingo
+    output_format: HEX
+    rgba_color:
+    - 242
+    - 205
+    - 205
+    - 255
+  ';':
+    name: overlay0
+    output_format: HEX
+    rgba_color:
+    - 108
+    - 112
+    - 134
+    - 255
+  'a':
+    name: sky
+    output_format: HEX
+    rgba_color:
+    - 137
+    - 220
+    - 235
+    - 255
+  'v':
+    name: base
+    output_format: HEX
+    rgba_color:
+    - 30
+    - 30
+    - 46
+    - 255
+  'h':
+    name: subtext1
+    output_format: HEX
+    rgba_color:
+    - 186
+    - 194
+    - 222
+    - 255
+  'j':
+    name: subtext0
+    output_format: HEX
+    rgba_color:
+    - 166
+    - 173
+    - 200
+    - 255
+  'c':
+    name: surface0
+    output_format: HEX
+    rgba_color:
+    - 49
+    - 50
+    - 68
+    - 255
+  'g':
+    name: text
+    output_format: HEX
+    rgba_color:
+    - 205
+    - 214
+    - 244
+    - 255
+  'd':
+    name: blue
+    output_format: HEX
+    rgba_color:
+    - 137
+    - 180
+    - 250
+    - 255
+  'l':
+    name: overlay1
+    output_format: HEX
+    rgba_color:
+    - 127
+    - 132
+    - 156
+    - 255
+  'q':
+    name: rosewater
+    output_format: HEX
+    rgba_color:
+    - 245
+    - 224
+    - 220
+    - 255
+  's':
+    name: sapphire
+    output_format: HEX
+    rgba_color:
+    - 116
+    - 199
+    - 236
+    - 255
+  't':
+    name: red
+    output_format: HEX
+    rgba_color:
+    - 243
+    - 139
+    - 168
+    - 255
+  'b':
+    name: mantle
+    output_format: HEX
+    rgba_color:
+    - 24
+    - 24
+    - 37
+    - 255

@@ -1,12 +1,36 @@
 name: KittyColors
 colors:
-  'a':
-    name: opaque green
-    output_format: HSL
+  'w':
+    name: cyan
+    output_format: HEXA
     rgba_color:
     - 0
     - 255
+    - 255
+    - 255
+  'e':
+    name: magenta
+    output_format: RGB
+    rgba_color:
+    - 255
     - 0
+    - 255
+    - 255
+  'y':
+    name: navy
+    output_format: CMYK
+    rgba_color:
+    - 45
+    - 65
+    - 146
+    - 255
+  'u':
+    name: brown
+    output_format: HSL
+    rgba_color:
+    - 100
+    - 21
+    - 12
     - 255
   't':
     name: glass
@@ -16,22 +40,6 @@ colors:
     - 0
     - 0
     - 0
-  'y':
-    name: navy
-    output_format: HSL
-    rgba_color:
-    - 100
-    - 21
-    - 12
-    - 255
-  'r':
-    name: red
-    output_format: RGBA
-    rgba_color:
-    - 255
-    - 0
-    - 0
-    - 136
   'q':
     name: green
     output_format: HEX
@@ -40,6 +48,22 @@ colors:
     - 255
     - 0
     - 0
+  'i':
+    name: transparent brown
+    output_format: HSL
+    rgba_color:
+    - 100
+    - 21
+    - 12
+    - 26
+  'a':
+    name: opaque green
+    output_format: HSL
+    rgba_color:
+    - 0
+    - 255
+    - 0
+    - 255
   's':
     name: half transparent blue
     output_format: HSL
@@ -48,30 +72,6 @@ colors:
     - 0
     - 255
     - 128
-  'd':
-    name: opaque white
-    output_format: HSL
-    rgba_color:
-    - 255
-    - 255
-    - 255
-    - 255
-  'u':
-    name: transparent navy
-    output_format: HSL
-    rgba_color:
-    - 100
-    - 21
-    - 12
-    - 26
-  'e':
-    name: magenta
-    output_format: RGB
-    rgba_color:
-    - 255
-    - 0
-    - 255
-    - 255
   'f':
     name: opaque grey
     output_format: HSL
@@ -88,11 +88,19 @@ colors:
     - 0
     - 0
     - 255
-  'w':
-    name: cyan
-    output_format: HEXA
+  'd':
+    name: opaque white
+    output_format: HSL
     rgba_color:
+    - 255
+    - 255
+    - 255
+    - 255
+  'r':
+    name: red
+    output_format: RGBA
+    rgba_color:
+    - 255
     - 0
-    - 255
-    - 255
-    - 255
+    - 0
+    - 136
