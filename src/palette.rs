@@ -2,15 +2,13 @@ extern crate serde;
 extern crate serde_yaml;
 
 use filenamify::filenamify;
-
 use serde::{Serialize,Deserialize};
-
 use std::fs;
-
 use std::collections::HashMap;
 use std::io::{Write, BufReader};
-
 use crate::color::{self, Color, Format};
+
+use ratatui::style::{Style, Color as RatatuiColor};
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Palette {
@@ -94,8 +92,27 @@ impl Palette {
             color.rgba_color[3] = 255;
         }
     }
-
-
+    
+    pub fn get_displayable(&self, key: char) -> Style {
+        let value = self.colors.get(&key);
+        match value {
+            None => Style::default(), 
+            Some(color) => {
+                Style::default()
+                    .fg(RatatuiColor::Black) //TODO: Should be an averaged color
+                    .bg(RatatuiColor::Rgb(
+                            color.rgba_color[0],
+                            color.rgba_color[1],
+                            color.rgba_color[2]
+                            ))
+            },
+        }    
+    }
+    // pub fn displayable(&self) -> Style {
+    //     return Style::default()
+    //         .fg(RatatuiColor::Black) //TODO: Should be an averaged color
+    //         .bg(RatatuiColor::Rgb(self.rgba_color[0],self.rgba_color[1],self.rgba_color[2]));
+    // }
 }
 
 
