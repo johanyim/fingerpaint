@@ -8,8 +8,9 @@ use crossterm::{
     ExecutableCommand,
 };
 use ratatui::{
-    prelude::{CrosstermBackend, Stylize, Terminal},
+    prelude::{CrosstermBackend, Terminal},
     widgets::Paragraph,
+    style::{Style,Color}
 };
 use std::io::{stdout, Result};
 
@@ -29,14 +30,19 @@ pub fn keyboard_selection(palette: &Palette) -> Result<char> {
     terminal.clear()?;
 
     let selection: char;
+    
+
+
+    let c: char = 'x';
     loop {
         //draw terminal
         terminal.draw(|frame| {
             let area = frame.size();
+            let text = palette.get_name(c);
+            let col = palette.get_rgba(c);
             frame.render_widget(
-                Paragraph::new("Hello Ratatui! (press 'q' to quit)")
-                .white()
-                .on_blue(),
+                Paragraph::new(text)
+                .style(Style::new().fg(Color::Rgb(col[0],col[1],col[2]))),
                 area,
                 );
         })?;
