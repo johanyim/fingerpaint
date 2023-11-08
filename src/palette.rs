@@ -98,13 +98,28 @@ impl Palette {
         match value {
             None => Style::default(), 
             Some(color) => {
-                Style::default()
-                    .fg(RatatuiColor::Black) //TODO: Should be an averaged color
-                    .bg(RatatuiColor::Rgb(
-                            color.rgba_color[0],
-                            color.rgba_color[1],
-                            color.rgba_color[2]
-                            ))
+                // whether the text should be white or black
+                // depends on the background
+                if color.rgba_color[0] as u16 
+                    + color.rgba_color[1] as u16
+                    + color.rgba_color[2] as u16 > (255+255+255)/2 {
+                    Style::default()
+                        .fg(RatatuiColor::Black) //TODO: Should be an averaged color
+                        .bg(RatatuiColor::Rgb(
+                                color.rgba_color[0],
+                                color.rgba_color[1],
+                                color.rgba_color[2]
+                                ))
+                }else{
+                    Style::default()
+                        .fg(RatatuiColor::White) //TODO: Should be an averaged color
+                        .bg(RatatuiColor::Rgb(
+                                color.rgba_color[0],
+                                color.rgba_color[1],
+                                color.rgba_color[2]
+                                ))
+
+                }
             },
         }    
     }

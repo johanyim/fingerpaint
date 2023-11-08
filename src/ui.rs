@@ -16,25 +16,13 @@ use ratatui::{
 use std::io::{stdout, Result};
 
 
+struct Keyboard<'a> {
+    keys: Vec<&'a str>,
+    r_offsets: Vec<&'a str>,
+}
+
+
 pub fn keyboard_selection(palette: &Palette) -> Result<char> {
-    
-    let keyboard = vec![
-        "`1234567890-=", 
-        "qwertyuiop[]", 
-        "asdfghjkl;'", 
-        "zxcvbnm,./"];
-
-
-
-    // let inner_layout = Layout::default()
-    //     .direction(Direction::Horizontal)
-    //     .constraints(vec![
-    //                  Constraint::Percentage(25),
-    //                  Constraint::Percentage(75),
-    //     ])
-    //     .split(outer_layout[1]);
-    
-
     stdout().execute(EnterAlternateScreen)?;
     enable_raw_mode()?;
     let mut terminal = Terminal::new(CrosstermBackend::new(stdout()))?;
@@ -42,93 +30,29 @@ pub fn keyboard_selection(palette: &Palette) -> Result<char> {
 
     let selection: char;
 
-    let c: char = 'q';
+    let keyboard = vec![
+        "`1234567890-=", 
+        "qwertyuiop[]", 
+        "asdfghjkl;'", 
+        "zxcvbnm,./"];
+    let h_layouts = layout_keys(terminal.size()?, keyboard.clone());
     loop {
         //draw terminal
         terminal.draw(|frame| {
 
-            let v_layout = Layout::default()
-                .direction(ratatui::layout::Direction::Vertical)
-                .constraints(vec![
-                             Constraint::Length(3),
-                             Constraint::Length(3),
-                             Constraint::Length(3),
-                             Constraint::Length(3),
-                ])
-                .split(frame.size());
 
-            let h_layout = Layout::default()
-                .direction(ratatui::layout::Direction::Horizontal)
-                .constraints(vec![
-                             Constraint::Ratio(1, 12),
-                             Constraint::Ratio(1, 12),
-                             Constraint::Ratio(1, 12),
-                             Constraint::Ratio(1, 12),
-                             Constraint::Ratio(1, 12),
-                             Constraint::Ratio(1, 12),
-                             Constraint::Ratio(1, 12),
-                             Constraint::Ratio(1, 12),
-                             Constraint::Ratio(1, 12),
-                             Constraint::Ratio(1, 12),
-                             Constraint::Ratio(1, 12),
-                             Constraint::Ratio(1, 12),
-                ])
-                .split(v_layout[0]);
+            let h_layouts = layout_keys(frame.size(), keyboard.clone());
+            render_keys(keyboard.clone(), h_layouts.clone(), frame, palette);
 
-            let area = frame.size();
-            let text = palette.get_name(c);
-            let col = palette.get_rgba(c);
 
-            frame.render_widget(
-                Paragraph::new(palette.get_name('q'))
-                .style(palette.get_displayable('q')),
-                h_layout[0],
-                );
-            frame.render_widget(
-                Paragraph::new(palette.get_name('w'))
-                .style(palette.get_displayable('w')),
-                h_layout[1],
-                );
-            frame.render_widget(
-                Paragraph::new(palette.get_name('e'))
-                .style(palette.get_displayable('e')),
-                h_layout[2],
-                );
-            frame.render_widget(
-                Paragraph::new(palette.get_name('r'))
-                .style(palette.get_displayable('r')),
-                h_layout[3],
-                );
-            frame.render_widget(
-                Paragraph::new(palette.get_name('t'))
-                .style(palette.get_displayable('t')),
-                h_layout[4],
-                );
-            frame.render_widget(
-                Paragraph::new(palette.get_name('y'))
-                .style(palette.get_displayable('y')),
-                h_layout[5],
-                );
-            frame.render_widget(
-                Paragraph::new(palette.get_name('u'))
-                .style(palette.get_displayable('u')),
-                h_layout[6],
-                );
-            frame.render_widget(
-                Paragraph::new(palette.get_name('i'))
-                .style(palette.get_displayable('i')),
-                h_layout[7],
-                );
-            frame.render_widget(
-                Paragraph::new(palette.get_name('o'))
-                .style(palette.get_displayable('o')),
-                h_layout[8],
-                );
-            frame.render_widget(
-                Paragraph::new(palette.get_name('p'))
-                .style(palette.get_displayable('p')),
-                h_layout[9],
-                );
+
+
+
+            // frame.render_widget(
+            //     Paragraph::new(palette.get_name(c))
+            //     .style(palette.get_displayable(c)),
+            //     h_layout[0],
+            //     );
         })?;
 
 
@@ -151,9 +75,61 @@ pub fn keyboard_selection(palette: &Palette) -> Result<char> {
     disable_raw_mode()?;
 
     return Ok(selection);
-
 }
 
 
+use ratatui::layout::{Rect, Direction::{Horizontal, Vertical}};
+use std::rc::Rc;
+fn layout_keys(area: Rect, keyboard: Vec<&str>) -> Vec<Rc<[Rect]>> {
+    //horizontal constraints
+    let mut h_constraints: Vec<Vec<Constraint>> = Vec::new();
+    //vertical constraints
+    let mut v_constraints: Vec<Constraint> = Vec::new();
+    for kb_row in keyboard.iter() {
+        v_constraints.push(Constraint::Length(5));
+        let mut row: Vec<Constraint> = Vec::new();
+        for _ in 0..kb_row.len(){
+            row.push(Constraint::Ratio(1,kb_row.len() as u32));
+        }
+        h_constraints.push(row);
+    }
+
+    //vertical layouts
+    let v_layout = Layout::default()
+        .direction(Vertical)
+        .margin(1)
+        .constraints(v_constraints)
+        .split(area);
+
+    //horizontal layouts = Vector of layouts
+    let mut h_layouts: Vec<Rc<[Rect]>> = Vec::new();
+    for i in 0..keyboard.len(){
+        let h_layout = Layout::default()
+            .direction(Horizontal)
+            .margin(0)
+            .constraints(h_constraints[i].clone())
+            .split(v_layout[i]);
+        h_layouts.push(h_layout);
+    }
+
+    return h_layouts;
+}
+
+fn render_keys(keyboard: Vec<&str>, layout:Vec<Rc<[Rect]>>, frame: &mut Frame, palette: &Palette) {
 
 
+
+    for i in 0..keyboard.len(){
+        for (j,key) in keyboard[i].chars().enumerate(){
+
+            let text = format!("{}\n{}", palette.get_name(key), key); 
+            frame.render_widget(
+                Paragraph::new(text)
+                .style(palette.get_displayable(key)),
+                layout[i][j],
+                );
+        }
+
+    }
+
+}
