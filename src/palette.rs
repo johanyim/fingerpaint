@@ -56,7 +56,7 @@ impl Palette {
         let value = self.colors.get(&key);
         match value {
             Some(color) => color.name.to_string(),
-            None => "Unassigned".to_string(), 
+            None => "".to_string(), 
         }    
     }
     

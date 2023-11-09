@@ -4,7 +4,6 @@ extern crate serde_yaml;
 use core::fmt;
 use serde::{Serialize,Deserialize};
 use csscolorparser::{self, ParseColorError};
-use ratatui::style::{Style, Color as RatatuiColor};
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Color{
@@ -85,11 +84,6 @@ impl Color {
                        alpha);
     }
 
-    pub fn displayable(&self) -> Style {
-        return Style::default()
-            .fg(RatatuiColor::Black) //TODO: Should be an averaged color
-            .bg(RatatuiColor::Rgb(self.rgba_color[0],self.rgba_color[1],self.rgba_color[2]));
-    }
 
 }
 
