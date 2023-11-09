@@ -6,6 +6,7 @@ use serde::{Serialize,Deserialize};
 use std::fs;
 use std::collections::HashMap;
 use std::io::{Write, BufReader};
+use std::path::PathBuf;
 use crate::color::{self, Color, Format};
 
 use ratatui::style::{Style, Color as RatatuiColor};
@@ -32,10 +33,13 @@ impl Palette {
         Ok(())
     }
 
-    pub fn load(palletename: &str) -> Result<Palette, std::io::Error> {
-        let filename = filenamify(palletename) + &".yaml";
-        
-        let file = fs::File::open(filename).expect("Could not find file");
+    pub fn load(directory: &str, palettename: &str) -> Result<Palette, std::io::Error> {
+
+        let mut path = PathBuf::from(directory);
+        path.push(filenamify(palettename));
+        path.set_extension("yaml");
+
+        let file = fs::File::open(path.as_path()).expect("Could not find file");
         let reader = BufReader::new(file);
 
         let loaded: Palette = serde_yaml::from_reader::<_, Palette>(reader)
@@ -44,7 +48,7 @@ impl Palette {
         return Ok(loaded);
     } 
 
-    pub fn add(&mut self, key: char, name: &str, format: color::Format, color: &str ){
+    pub fn set(&mut self, key: char, name: &str, format: color::Format, color: &str ){
         let col = Color::new(name, format, color);
         match col {
             Ok(color) => {self.colors.insert(key, color); return},
@@ -104,7 +108,7 @@ impl Palette {
                     + color.rgba_color[1] as u16
                     + color.rgba_color[2] as u16 > (255+255+255)/2 {
                     Style::default()
-                        .fg(RatatuiColor::Black) //TODO: Should be an averaged color
+                        .fg(RatatuiColor::Black)
                         .bg(RatatuiColor::Rgb(
                                 color.rgba_color[0],
                                 color.rgba_color[1],
@@ -112,7 +116,7 @@ impl Palette {
                                 ))
                 }else{
                     Style::default()
-                        .fg(RatatuiColor::White) //TODO: Should be an averaged color
+                        .fg(RatatuiColor::White) 
                         .bg(RatatuiColor::Rgb(
                                 color.rgba_color[0],
                                 color.rgba_color[1],
@@ -123,11 +127,6 @@ impl Palette {
             },
         }    
     }
-    // pub fn displayable(&self) -> Style {
-    //     return Style::default()
-    //         .fg(RatatuiColor::Black) //TODO: Should be an averaged color
-    //         .bg(RatatuiColor::Rgb(self.rgba_color[0],self.rgba_color[1],self.rgba_color[2]));
-    // }
 }
 
 

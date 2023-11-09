@@ -1,84 +1,60 @@
 use copypasta_ext::prelude::*;
 use copypasta_ext::x11_fork::ClipboardContext;
-use qolor::palette::Palette;
-use colored::Colorize;
+use qolor::{palette::Palette, 
+    ui::{start_terminal, 
+        restore_terminal}
+};
 use anyhow::{Context, Result};
-use qolor::ui;
+use serde::{Serialize, Deserialize};
+
+use toml::Table;
 
 
+#[derive(Deserialize)]
+struct Config {
+    path: String,
+    selected: String,
+    auto_type: bool,
+    close_on_select: bool,
+    copy_to_clipboard: bool,
+}
 
 fn main() -> Result<()> {
-    let catppuccin = Palette::load("catppuccin")?;
-    // let keyboard = vec!["`1234567890-=", "qwertyuiop[]", "asdfghjkl;'", "zxcvbnm,./"];
-    let selection: char = ui::keyboard_selection(&catppuccin)?;
 
-    
+    let pathstr = "./config.toml";
 
+    let path = std::path::Path::new(pathstr);
+    let file = std::fs::read_to_string(path)
+        .expect("path to config not found");
 
+    let config: Config = toml::from_str(&file).unwrap();
 
-    //copied to clipboard
-    let mut ctx = ClipboardContext::new().unwrap();
-    
-    println!("char = {}, color = {}", &selection, catppuccin.get_name(selection));
+    let _ = start_terminal();
+    loop {
+        let catppuccin = Palette::load(&config.path, &config.selected)?;
+        let input = qolor::ui::keyboard_selection(&catppuccin);
 
-    let to_copy = &catppuccin.get_string(selection);
-    ctx.set_contents(to_copy.into()).unwrap();
+        //copied to clipboard
+        let mut ctx = ClipboardContext::new().unwrap();
 
+        
+        if let Ok(keypress) = input {
+            match keypress {
+                Some(c) => { 
+                    let to_copy = &catppuccin.get_string(c);
+                    let _ = ctx.set_contents(to_copy.into());
+                },
+                None => break,
+            } 
+        }
 
+        if config.close_on_select {
+            break
+        }
+    }
+
+    let _ = restore_terminal();
     //exit gui
     Ok(())
 }
-
-
-//using println
-fn selection(palette: Palette) {
-
-    let keyboard = vec!["`1234567890-=", "qwertyuiop[]", "asdfghjkl;'", "zxcvbnm,./"];
-
-    let offsets = ["", "  ", "   ","     "];
-
-    for row in 0..keyboard.len() {
-        println!("{}", offsets[row]);
-        for button in keyboard[row].chars() {
-            let col = palette.get_rgba(button);
-            print!("{}", &format!(" {} ", button).on_truecolor(col[0], col[1], col[2]));
-        }
-        println!("\n");
-
-    }
-}
-
-//     initscr();
-// /* Print to the back buffer. */
-//
-//     let offsets = ["", "  ", "   ","     "];
-//
-//     for row in 0..keyboard.len() {
-//         addstr(offsets[row]);
-//         for button in keyboard[row].chars() {
-//             let col = palette.get_rgba(button);
-//             addstr(&format!(" {} ", button).on_truecolor(col[0], col[1], col[2]));
-//         }
-//         addstr("\n");
-//
-//     }
-
-    // for character in keyboard.chars() {
-    //     let col = palette.get_rgba(character);
-    //     println!("{} = {}",k
-    //              palette.get_name(character),
-    //              palette.get_string(character)
-    //                 .truecolor(17,17,27)
-    //                 .on_truecolor(col[0], col[1], col[2]));
-    // }
-
-
-    // /* Update the screen. */
-    // refresh();
-    //
-    // /* Wait for a key press. */
-    // getch();
-    //
-    // /* Terminate ncurses. */
-    // endwin();
 

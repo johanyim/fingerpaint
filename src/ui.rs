@@ -110,13 +110,11 @@ impl<'a> Keyboard<'_> {
 
 }
 
-pub fn keyboard_selection(palette: &Palette) -> Result<char> {
-    stdout().execute(EnterAlternateScreen)?;
-    enable_raw_mode()?;
+pub fn keyboard_selection(palette: &Palette) -> Result<Option<char>> {
     let mut terminal = Terminal::new(CrosstermBackend::new(stdout()))?;
     terminal.clear()?;
 
-    let selection: char;
+    let selection: Result<Option<char>>;
 
     let keys = vec![
         "`1234567890-=", 
@@ -139,24 +137,37 @@ pub fn keyboard_selection(palette: &Palette) -> Result<char> {
 
 
         //handle events
-        if event::poll(std::time::Duration::from_millis(16))? {
+        if event::poll(std::time::Duration::from_millis(16000))? {
             if let event::Event::Key(key) = event::read()? {
                 // if key.kind == KeyEventKind::Press && key.code == KeyCode::Char('q') {
                 if key.kind == KeyEventKind::Press {
-                    match key.code {
-                        KeyCode::Char(c) => {selection = c; break},
-                        _ => (),
+
+                    if let KeyCode::Char(c) = key.code {
+                        selection = Ok(Some(c)); break
                     }
-                    // break;
+                     
+                    if let KeyCode::Esc = key.code {
+                        selection = Ok(None); break
+                    }
                 }
             }
         }
     }
 
+    return selection;
+}
+
+pub fn start_terminal() -> Result<()> {
+    stdout().execute(EnterAlternateScreen)?;
+    enable_raw_mode()?;
+    return Ok(())
+}
+
+
+pub fn restore_terminal() -> Result<()>{
     stdout().execute(LeaveAlternateScreen)?;
     disable_raw_mode()?;
-
-    return Ok(selection);
+    return Ok(())
 }
 
 
