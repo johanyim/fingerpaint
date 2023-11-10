@@ -1,6 +1,7 @@
 extern crate serde;
 extern crate serde_yaml;
 
+use csscolorparser::ParseColorError;
 use filenamify::filenamify;
 use serde::{Serialize,Deserialize};
 use std::fs;
@@ -23,9 +24,12 @@ impl Palette {
         return Palette{name: name.to_string(), colors};
     }
     
-    pub fn save(self) -> std::io::Result<()> {
-        let safe_filename = filenamify(self.name.clone()) + &".yaml";
-        let mut output = fs::File::create(safe_filename)?;
+    pub fn save(self, directory: &str) -> std::io::Result<()> {
+        let mut path = PathBuf::from(directory);
+        path.push(filenamify(self.name.clone()));
+        path.set_extension("yaml");
+
+        let mut output = fs::File::create(path.as_path())?;
         let yaml = serde_yaml::to_string(&self).unwrap();
         
         // write!(output, "{}", yaml) 
@@ -48,12 +52,17 @@ impl Palette {
         return Ok(loaded);
     } 
 
-    pub fn set(&mut self, key: char, name: &str, format: color::Format, color: &str ){
-        let col = Color::new(name, format, color);
-        match col {
-            Ok(color) => {self.colors.insert(key, color); return},
-            Err(e) => {eprintln!("{e}: '{color}' was not a valid color")},
+    pub fn set(&mut self, key: char, name: &str, format: color::Format, content: &str ) -> Result<(), ParseColorError>{
+        let content = Color::new(name, format, content);
+        match content {
+            Ok(color) => self.colors.insert(key, color),
+            Err(e) => return Err(e),
         };
+        return Ok(());
+        // match col {
+        //     Ok(color) => {self.colors.insert(key, color); return Ok(())},
+        //     Err(e) => {eprintln!("{e}: '{color}' was not a valid color"); return Err(e) },
+        // };
     }
     
     pub fn get_name(&self, key: char) -> String {

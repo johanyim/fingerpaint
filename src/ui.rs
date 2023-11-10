@@ -7,7 +7,7 @@ use crossterm::{
     ExecutableCommand,
 };
 use ratatui::{
-    prelude::{CrosstermBackend, Terminal},
+    prelude::*,
     widgets::{Paragraph},
     style::{Style,Color},
     layout::{Layout, Constraint, Rect, 
@@ -15,7 +15,7 @@ use ratatui::{
     }, 
     Frame,
 };
-use std::rc::Rc;
+use std::{rc::Rc, io::Stdout};
 use std::io::{stdout, Result};
 
 
@@ -26,6 +26,9 @@ struct Keyboard<'a> {
     key_height: u16,
     key_width: u16,
 }
+
+//reduce writing
+type Terminal = ratatui::Terminal<CrosstermBackend<Stdout>>;
 
 impl<'a> Keyboard<'_> {
     
@@ -110,9 +113,7 @@ impl<'a> Keyboard<'_> {
 
 }
 
-pub fn keyboard_selection(palette: &Palette) -> Result<Option<char>> {
-    let mut terminal = Terminal::new(CrosstermBackend::new(stdout()))?;
-    terminal.clear()?;
+pub fn keyboard_selection(terminal: &mut Terminal, palette: &Palette) -> Result<Option<char>> {
 
     let selection: Result<Option<char>>;
 
@@ -137,7 +138,7 @@ pub fn keyboard_selection(palette: &Palette) -> Result<Option<char>> {
 
 
         //handle events
-        if event::poll(std::time::Duration::from_millis(16000))? {
+        if event::poll(std::time::Duration::from_millis(100))? {
             if let event::Event::Key(key) = event::read()? {
                 // if key.kind == KeyEventKind::Press && key.code == KeyCode::Char('q') {
                 if key.kind == KeyEventKind::Press {
@@ -157,10 +158,11 @@ pub fn keyboard_selection(palette: &Palette) -> Result<Option<char>> {
     return selection;
 }
 
-pub fn start_terminal() -> Result<()> {
+pub fn start_terminal() -> Result<Terminal> {
     stdout().execute(EnterAlternateScreen)?;
     enable_raw_mode()?;
-    return Ok(())
+    let terminal = Terminal::new(CrosstermBackend::new(stdout()))?;
+    return Ok(terminal)
 }
 
 
