@@ -4,7 +4,7 @@ extern crate serde_yaml;
 use csscolorparser::ParseColorError;
 use filenamify::filenamify;
 use serde::{Serialize,Deserialize};
-use std::fs;
+use std::{fs, path};
 use std::collections::HashMap;
 use std::io::{Write, BufReader};
 use std::path::PathBuf;
@@ -25,8 +25,8 @@ impl Palette {
         return Palette{name: name.to_string(), colors};
     }
     
-    pub fn save(&self, config: Config) -> std::io::Result<()> {
-        let mut path = PathBuf::from(config.path);
+    pub fn save(&self, config: &Config) -> std::io::Result<()> {
+        let mut path = PathBuf::from(&config.palettes);
         path.push(filenamify(self.name.clone()));
         path.set_extension("yaml");
 
@@ -38,10 +38,10 @@ impl Palette {
         Ok(())
     }
 
-    pub fn load(directory: &str, palettename: &str) -> Result<Palette, std::io::Error> {
+    pub fn load(config: &Config) -> Result<Palette, std::io::Error> {
 
-        let mut path = PathBuf::from(directory);
-        path.push(filenamify(palettename));
+        let mut path = PathBuf::from(&config.palettes);
+        path.push(filenamify(&config.selected));
         path.set_extension("yaml");
 
         let file = fs::File::open(path.as_path()).expect("Could not find file");
@@ -60,10 +60,6 @@ impl Palette {
             Err(e) => return Err(e),
         };
         return Ok(());
-        // match col {
-        //     Ok(color) => {self.colors.insert(key, color); return Ok(())},
-        //     Err(e) => {eprintln!("{e}: '{color}' was not a valid color"); return Err(e) },
-        // };
     }
     
     pub fn get_name(&self, key: char) -> String {

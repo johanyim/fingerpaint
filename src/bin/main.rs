@@ -1,3 +1,5 @@
+use std::{path::Path, result};
+
 use copypasta_ext::prelude::*;
 use copypasta_ext::x11_fork::ClipboardContext;
 use qolor::{palette::Palette, 
@@ -19,7 +21,9 @@ enum Command {
     /// Set a color given key and color for selected palette
     Set { key: char , color: Option<String>},
     /// Removes color at the key specified for the selected palette
-    Remove { key: char }
+    Remove { key: char },
+
+    New { name: Option<String> },
 
 }
 
@@ -41,27 +45,25 @@ struct Arguments {
 fn main() -> Result<()> {
 
     let args = Arguments::parse();
-    let pathstr = match args.config {
-        Some(p) => p.to_string(),
-        None => String::from("./config.toml"),
-    };
 
-    let path = std::path::Path::new(&pathstr);
-    let file = std::fs::read_to_string(path)
-        .expect("path to config not found");
+    let c_arg: Option<String>= args.config;
 
-    let config: qolor::config::Config = toml::from_str(&file).unwrap();
-
-    let mut palette = Palette::load(&config.path, &config.selected)?;
+    let config: Config = Config::read(c_arg)?;
+    //loading palette
+    let mut palette = Palette::load(&config)?;
 
     if let Some(subcommand) = args.subcommand {
         match subcommand {
             Command::Set { key, color} => {
-                set(config, &mut palette, key, color);
+                set(&config, &mut palette, key, color);
                 return Ok(())
             },
             Command::Remove { key } => { 
-                remove(config, &mut palette, key);
+                remove(&config, &mut palette, key);
+                return Ok(())
+            },
+            Command::New { name } => { 
+                todo!();
                 return Ok(())
             },
         }
@@ -94,13 +96,19 @@ fn main() -> Result<()> {
         }
     }
 
-    let _ = restore_terminal();
+    restore_terminal()?;
     //exit gui
     Ok(())
 }
 
+
+
+
+// pub fn run(config: &Config, )
+
+
 // set <KEY> [color]
-pub fn set(config: Config, palette: &mut Palette, key: char, color: Option<String>) {
+pub fn set(config: &Config, palette: &mut Palette, key: char, color: Option<String>) {
 
     let mut ctx = ClipboardContext::new().unwrap();
 
@@ -125,16 +133,16 @@ pub fn set(config: Config, palette: &mut Palette, key: char, color: Option<Strin
     palette.set(key, "Unnamed", qolor::color::Format::HEX, &valid_color)
         .expect("Should have been a valid color from contents");
 
-    let _ = palette.save(config);
+    let _ = palette.save(&config);
     println!("\"{valid_color}\" was saved to key {key} as {}.", "Unnamed");
 }
 
 // remove <KEY>
-pub fn remove(config: Config, palette: &mut Palette, key: char){
+pub fn remove(config: &Config, palette: &mut Palette, key: char){
     match palette.remove(key) {
         Some(color) => println!("{} was removed from key {}.", color.name, key),
         None => println!("No color was found at key {key}"),
     }
-    let _ = palette.save(config);
+    let _ = palette.save(&config);
 }
 
