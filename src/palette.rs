@@ -9,6 +9,7 @@ use std::collections::HashMap;
 use std::io::{Write, BufReader};
 use std::path::PathBuf;
 use crate::color::{self, Color, Format};
+use crate::config::Config;
 
 use ratatui::style::{Style, Color as RatatuiColor};
 
@@ -24,8 +25,8 @@ impl Palette {
         return Palette{name: name.to_string(), colors};
     }
     
-    pub fn save(self, directory: &str) -> std::io::Result<()> {
-        let mut path = PathBuf::from(directory);
+    pub fn save(&self, config: Config) -> std::io::Result<()> {
+        let mut path = PathBuf::from(config.path);
         path.push(filenamify(self.name.clone()));
         path.set_extension("yaml");
 

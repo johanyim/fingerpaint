@@ -2,7 +2,8 @@ use copypasta_ext::prelude::*;
 use copypasta_ext::x11_fork::ClipboardContext;
 use qolor::{palette::Palette, 
     ui::{start_terminal, 
-        restore_terminal}
+        restore_terminal},
+    config::Config,
 };
 use anyhow::{Context, Result};
 use serde::{Serialize, Deserialize};
@@ -11,14 +12,6 @@ use toml::Table;
 use clap::{Parser, Subcommand};
 
 
-#[derive(Deserialize)]
-struct Config {
-    path: String,
-    selected: String,
-    auto_type: bool,
-    close_on_select: bool,
-    copy_to_clipboard: bool,
-}
 
 
 #[derive(Subcommand)]
@@ -38,13 +31,11 @@ enum Command {
 #[command(author, version, about, long_about)]
 struct Arguments {
     #[command(subcommand)]
-    command: Option<Command>,
+    subcommand: Option<Command>,
     #[arg(short, long)]
     palette: Option<String>,
     #[arg(short, long)]
     config: Option<String>,
-
-
 }
 
 fn main() -> Result<()> {
@@ -59,50 +50,21 @@ fn main() -> Result<()> {
     let file = std::fs::read_to_string(path)
         .expect("path to config not found");
 
-    let config: Config = toml::from_str(&file).unwrap();
+    let config: qolor::config::Config = toml::from_str(&file).unwrap();
 
     let mut palette = Palette::load(&config.path, &config.selected)?;
 
-    // palette.set('1', "testing", qolor::color::Format::RGBA, "#000444")?;
-
-    if let Some(command) = args.command {
-        match command {
+    if let Some(subcommand) = args.subcommand {
+        match subcommand {
             Command::Set { key, color} => {
-                let mut ctx = ClipboardContext::new().unwrap();
-                let contents = match color {
-                    //no arguments after 'set' = read clipboard
-                    None => ctx.get_contents()
-                        .expect("Clipboard content should be obtainable"),
-
-                    //some argument after 'set' = color has been specified 
-                    Some(string) => {
-                        match csscolorparser::parse(&string) {
-                            Ok(color) =>  color.to_hex_string() ,
-                            Err(e) => {eprintln!("\"{string}\" could not be parsed as a valid color. Error: {e}");
-                            return Ok(())},
-                        }
-                    }
-                        // .expect(&format!("{} is not a valid color", &string))},
-                };                
-                match palette.set(key, "Unnamed", qolor::color::Format::HEX, &contents) {
-                    Ok(_) => println!("\"{}\" was saved to key {} as {contents}.", "Unnamed", key),
-                    Err(e) => println!("\"{contents}\" could not be parsed as a color. Error: {e}"),
-                } 
-                let _ = palette.save(&config.path);
+                set(config, &mut palette, key, color);
                 return Ok(())
             },
             Command::Remove { key } => { 
-                match palette.remove(key) {
-                    Some(color) => println!("{} was removed from key {}.", color.name, key),
-                    None => println!("No color was found at key {key}"),
-                }
-
-                let _ = palette.save(&config.path);
+                remove(config, &mut palette, key);
                 return Ok(())
             },
-
         }
-
     }
 
     
@@ -135,5 +97,44 @@ fn main() -> Result<()> {
     let _ = restore_terminal();
     //exit gui
     Ok(())
+}
+
+// set <KEY> [color]
+pub fn set(config: Config, palette: &mut Palette, key: char, color: Option<String>) {
+
+    let mut ctx = ClipboardContext::new().unwrap();
+
+    //either read clipboard (hopefully a color)
+    //or read the argument passed
+    let contents = match color {
+        None => ctx.get_contents()
+            .expect("Clipboard content should be obtainable"),
+        Some(string) => string,
+    };                
+
+    //parsing the color
+    let valid_color = match csscolorparser::parse(&contents) {
+        Err(e) => {
+            eprintln!("\"{contents}\" could not be parsed as a valid color. Error: {e}");
+            return;
+        },
+        Ok(color) =>  color.to_hex_string() ,
+    };
+
+    // at this point, we must have a valid color
+    palette.set(key, "Unnamed", qolor::color::Format::HEX, &valid_color)
+        .expect("Should have been a valid color from contents");
+
+    let _ = palette.save(config);
+    println!("\"{valid_color}\" was saved to key {key} as {}.", "Unnamed");
+}
+
+// remove <KEY>
+pub fn remove(config: Config, palette: &mut Palette, key: char){
+    match palette.remove(key) {
+        Some(color) => println!("{} was removed from key {}.", color.name, key),
+        None => println!("No color was found at key {key}"),
+    }
+    let _ = palette.save(config);
 }
 
