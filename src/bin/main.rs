@@ -24,7 +24,7 @@ struct Config {
 #[derive(Subcommand)]
 enum Command {
     /// Set a color given key and color for selected palette
-    Set { key: char },
+    Set { key: char , color: Option<String>},
     /// Removes color at the key specified for the selected palette
     Remove { key: char }
 
@@ -67,13 +67,26 @@ fn main() -> Result<()> {
 
     if let Some(command) = args.command {
         match command {
-            Command::Set { key } => {
+            Command::Set { key, color} => {
                 let mut ctx = ClipboardContext::new().unwrap();
-                let contents = ctx.get_contents()
-                    .expect("Clipboard content should be obtainable");
+                let contents = match color {
+                    //no arguments after 'set' = read clipboard
+                    None => ctx.get_contents()
+                        .expect("Clipboard content should be obtainable"),
+
+                    //some argument after 'set' = color has been specified 
+                    Some(string) => {
+                        match csscolorparser::parse(&string) {
+                            Ok(color) =>  color.to_hex_string() ,
+                            Err(e) => {eprintln!("\"{string}\" could not be parsed as a valid color. Error: {e}");
+                            return Ok(())},
+                        }
+                    }
+                        // .expect(&format!("{} is not a valid color", &string))},
+                };                
                 match palette.set(key, "Unnamed", qolor::color::Format::HEX, &contents) {
-                    Ok(_) => println!("{} was saved to key {} as {contents}.", "Unnamed", key),
-                    Err(e) => println!("{contents} could not be parsed as a color. Error: {e}"),
+                    Ok(_) => println!("\"{}\" was saved to key {} as {contents}.", "Unnamed", key),
+                    Err(e) => println!("\"{contents}\" could not be parsed as a color. Error: {e}"),
                 } 
                 let _ = palette.save(&config.path);
                 return Ok(())
