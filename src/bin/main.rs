@@ -44,11 +44,13 @@ struct Arguments {
 
 fn main() -> Result<()> {
 
+
+
     let args = Arguments::parse();
 
     let c_arg: Option<String>= args.config;
 
-    let config: Config = Config::read(c_arg)?;
+    let config: Config = Config::build(c_arg)?;
     //loading palette
     let mut palette = Palette::load(&config)?;
 
@@ -68,8 +70,6 @@ fn main() -> Result<()> {
             },
         }
     }
-
-    
 
 
     let mut terminal = start_terminal()?;
