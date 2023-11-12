@@ -1,3 +1,7 @@
+use std::{path::Path, ffi::OsString};
+use crate::error::ConfigError::{
+    self, CouldNotParse, NotFound, NoConfigFolder, NoConfiguration};
+use casual::confirm;
 #[derive(serde::Deserialize)]
 pub struct Config {
     pub palettes: String,
@@ -19,103 +23,115 @@ impl Default for Config {
     }
 }
 
-fn get_default_path() -> anyhow::Result<OsString> {
+fn read_specified_path(pathstr: String) -> Result<String, ConfigError>{
+    let path = Path::new(&pathstr);
+    match std::fs::read_to_string(path) {
+        Err(_) => {
+            eprintln!("Could not read the specified path: {pathstr}");
+            return Err(NotFound(pathstr))
+        },
+        Ok(contents) => return Ok(contents),
+    };
+}
+
+fn read_default_path() -> Result<String, ConfigError> {
+    let pathstr: String = get_default_path()?;    
+    let path = Path::new(&pathstr);
+    match std::fs::read_to_string(path) {
+        Err(_) => {
+            eprintln!("Could not read the default path: {pathstr}");
+            if confirm("Would you like to make a default configuration at {pathstr}?") {
+                todo!("Makes the config")
+            }
+            return Err(NotFound(pathstr)) },
+        Ok(contents) => return Ok(contents),
+    };
+} // -c is unspecified use system default (created or not created)
+
+fn get_default_path() -> Result<String, ConfigError> {
     //look for a configuration file 
     //read from environment, or give a default
     //Look for configuration location environment variable if specified
-    let config_home = std::env::var("XDG_CONFIG_HOME")
-        .expect("user has a config home path");
+    let config_home_str = "XDG_CONFIG_HOME";
+    let config_home = match std::env::var(config_home_str) {
+        Ok(c) => c,
+        Err(_) => {
+            eprintln!("Configuration home path (${config_home_str}) is not set, default file could not be found.");
+            return Err(NoConfigFolder(config_home_str
+                           .to_string())
+                       )
+        },
+    };
     let mut conf_path = std::path::PathBuf::new();
     conf_path.push(config_home);
     conf_path.push("fingerpaint");
     conf_path.push("fingerpaint");
     conf_path.set_extension("toml");
 
-    Ok(conf_path.into_os_string())
+    Ok(conf_path.into_os_string()
+       .to_str()
+       .unwrap_or("config home string config")
+       .to_string())
 }
-use std::{path::Path, ffi::OsString};
-impl Config {
-
-    fn specified() {todo!()} // -c is specified (valid or invalid)
-    fn unspecified() {todo!()} // -c is unspecified use system default (created or not created)
-    fn prompt_create() {todo!()} // prompts user to create a configuration at the location
-                            // error
 
 
+fn parse_contents(contents: String) -> Result<Config, ConfigError> {
+    return match toml::from_str(&contents) {
+        Ok(config) => Ok(config),  
+        Err(e) => {
+            eprintln!("{e} Could not parse toml file");
+            return Err(CouldNotParse(e))
+        },
+    };
 
-    pub fn build(config_arg: Option<String>) -> anyhow::Result<Self> {
-        match config_arg {
-            None => {
-                
-                let config_osstring: OsString = match get_default_path() {
-                    Ok(path) => path,
-                    Err(e) => return Err(e),
-                };
-                let config_path: &Path = Path::new(&config_osstring);
+}
 
-                if config_path.exists() {
-                    //read the config, and return it
-                    return Ok(toml::from_str(
-                            &std::fs::read_to_string(config_path)
-                            .expect("Default path should have been valid"))
-                        .expect("Default config should have been readable as .toml"));
-                }else{
-                    //prompt
-                    if casual::confirm( 
-                        format!("The config at \"{}\" could not be found, \
-                                would you like to make one?", 
-                                config_path.to_str().unwrap())) 
-                    {
-                        todo!("touch config_location, write default config to default location, return config_config;");
-                    }else {
-                        println!("Using default configuration.");
-                        return Ok(Config::default());
-                    }
-                }
-            },
-            Some(pathstr) => {
-                let path = std::path::Path::new(&pathstr);
-
-                if path.exists() {
-                    //read the config, and return it
-                    match std::fs::read_to_string(path) {
-                        Ok(f) => f,
-                        Err(e) => {
-                            eprintln!("\"{pathstr}\" was not a valid configuration path."); 
-                            if casual::confirm("Use default configuration instead?") {
-                                return Ok(Config::default());
-                            }else{
-                                return Err(e.into());
-                            };
-                        },
-                    };
-
-                }else{
-                    eprintln!("No file found at {pathstr}.");
-                    if casual::confirm("Use default configuration instead?") {
-                        return Ok(Config::default());
-                    }else{
-                        todo!();
-                    };
-                }
-
-                let file = std::fs::read_to_string(path)
-                    .expect("path to config not found");
-
-                match toml::from_str(&file) {
-                    Ok(config) => return Ok(config),  
-                    Err(e) =>{ 
-                        eprintln!("\"{pathstr}\" could not be parsed as a .toml file");
-                        if casual::confirm("Use default configuration instead?") {
-                            return Ok(Config::default());
-                        }else{
-                            return Err(e.into());
-                        };
-                    }
-                }
-            },
-        }
+fn prompt_create(pathstr: String) -> Result<(), ConfigError> {
+    if confirm(format!("Would you like to create a default configuration file at {pathstr}?")){
+        todo!("makes default configuration");
+        // return Ok(Config::default());
+    } else {
+        return Err(NoConfiguration);
     }
+    
+    // if confirm("Use default configuration instead?") {
+    //     return Ok(Config::default());
+    // }
+    //
+    // return Err(NoConfiguration);
+} 
+// prompts user to create a configuration at the location
+// error
+
+fn prompt_use_default() -> Result<Config, ConfigError>{
+    if confirm("Run with default settings?") {
+        return Ok(Config::default())
+    }else{
+        return Err(NoConfiguration)
+    }
+}
+
+impl Config {
+    pub fn build(config_arg: Option<String>) -> Result<Self, ConfigError> {
+        
+        let readfile = match config_arg {
+            Some(config_path) => read_specified_path(config_path),
+            None => read_default_path(),
+        };
+
+        let contents: String = match readfile {
+            Ok(c) => c,
+            Err(_) => return prompt_use_default(),
+        };
+
+        match parse_contents(contents) {
+            Ok(config) => return Ok(config),
+            Err(e) => return prompt_use_default(),
+        }
+
+    }
+
+
 }
 
 
