@@ -83,7 +83,6 @@ fn parse_contents(contents: String) -> Result<Config, ConfigError> {
             return Err(CouldNotParse(e))
         },
     };
-
 }
 
 fn prompt_create(pathstr: String) -> Result<(), ConfigError> {
@@ -128,13 +127,5 @@ impl Config {
             Ok(config) => return Ok(config),
             Err(e) => return prompt_use_default(),
         }
-
     }
-
-
 }
-
-
-
-
-
