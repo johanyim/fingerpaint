@@ -5,7 +5,7 @@ use copypasta_ext::x11_fork::ClipboardContext;
 use qolor::{palette::Palette, 
     ui::{start_terminal, 
         restore_terminal},
-    config::Config,
+    config::Config, error::ConfigError,
 };
 use anyhow::{Context, Result};
 use serde::{Serialize, Deserialize};
@@ -36,8 +36,10 @@ enum Command {
 struct Arguments {
     #[command(subcommand)]
     subcommand: Option<Command>,
+    ///Palette to use upon startup
     #[arg(short, long)]
     palette: Option<String>,
+    ///Path to configuration file
     #[arg(short, long)]
     config: Option<String>,
 }
@@ -63,15 +65,21 @@ fn main() -> Result<()> {
                 return Ok(())
             },
             Command::New { name } => { 
-                todo!();
+                new(&config, name);
                 return Ok(())
             },
         }
     } else {
+        run(&config, &mut palette);
 
     }
 
 
+    //exit gui
+    Ok(())
+}
+
+pub fn run(config: &Config, palette: &mut Palette) -> Result<()> {
     let mut terminal = start_terminal()?;
     loop {
         let input = qolor::ui::keyboard_selection(&mut terminal, &palette);
@@ -97,10 +105,8 @@ fn main() -> Result<()> {
     }
 
     restore_terminal()?;
-    //exit gui
     Ok(())
 }
-
 
 
 
@@ -144,5 +150,20 @@ pub fn remove(config: &Config, palette: &mut Palette, key: char){
         None => println!("No color was found at key {key}"),
     }
     let _ = palette.save(&config);
+}
+
+
+use qolor::error::PaletteError;
+pub fn new(config: &Config, name: Option<String> ) -> Result<(), PaletteError> {
+
+    let palettename = match name { 
+        None => casual::prompt("Name: ").default("Unnamed".to_string()).get(),
+        Some(n) => n 
+    };
+    let mut palette = Palette::new(&palettename);
+    let _ = run(&config, &mut palette);
+    palette.save(config)?;
+    Ok(())
+
 }
 

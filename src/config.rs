@@ -4,8 +4,9 @@ use crate::error::ConfigError::{
 use casual::confirm;
 #[derive(serde::Deserialize)]
 pub struct Config {
-    pub palettes: String,
-    pub selected: String,
+    /// path to palettes directory, Use default config is set to none
+    pub palettes: Option<String>,
+    pub selected: Option<String>,
     pub auto_type: bool,
     pub copy_to_clipboard: bool,
     pub close_on_select: bool,
@@ -14,11 +15,32 @@ pub struct Config {
 impl Default for Config {
     fn default() -> Self {
         Config{
-            palettes: "/home/johan/.config/fingerpaint/palettes".to_string(),
-            selected: "catppuccin".to_string(),
+            // palettes: Some("/home/johan/.config/fingerpaint/palettes".to_string()),
+            palettes: None,  
+            selected: None,
             auto_type: true,
             close_on_select: true,
             copy_to_clipboard: false,
+        }
+    }
+}
+
+impl Config {
+    pub fn build(config_arg: Option<String>) -> Result<Self, ConfigError> {
+        
+        let readfile = match config_arg {
+            Some(config_path) => read_specified_path(config_path),
+            None => read_default_path(),
+        };
+
+        let contents: String = match readfile {
+            Ok(c) => c,
+            Err(_) => return prompt_use_default(),
+        };
+
+        match parse_contents(contents) {
+            Ok(config) => return Ok(config),
+            Err(e) => return prompt_use_default(),
         }
     }
 }
@@ -102,22 +124,3 @@ fn prompt_use_default() -> Result<Config, ConfigError>{
     }
 }
 
-impl Config {
-    pub fn build(config_arg: Option<String>) -> Result<Self, ConfigError> {
-        
-        let readfile = match config_arg {
-            Some(config_path) => read_specified_path(config_path),
-            None => read_default_path(),
-        };
-
-        let contents: String = match readfile {
-            Ok(c) => c,
-            Err(_) => return prompt_use_default(),
-        };
-
-        match parse_contents(contents) {
-            Ok(config) => return Ok(config),
-            Err(e) => return prompt_use_default(),
-        }
-    }
-}
