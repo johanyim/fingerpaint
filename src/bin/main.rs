@@ -44,8 +44,6 @@ struct Arguments {
 
 fn main() -> Result<()> {
 
-
-
     let args = Arguments::parse();
 
     let c_arg: Option<String>= args.config;
@@ -69,6 +67,8 @@ fn main() -> Result<()> {
                 return Ok(())
             },
         }
+    } else {
+
     }
 
 

@@ -92,15 +92,7 @@ fn prompt_create(pathstr: String) -> Result<(), ConfigError> {
     } else {
         return Err(NoConfiguration);
     }
-    
-    // if confirm("Use default configuration instead?") {
-    //     return Ok(Config::default());
-    // }
-    //
-    // return Err(NoConfiguration);
 } 
-// prompts user to create a configuration at the location
-// error
 
 fn prompt_use_default() -> Result<Config, ConfigError>{
     if confirm("Run with default settings?") {

@@ -8,8 +8,7 @@ use crossterm::{
 };
 use ratatui::{
     prelude::*,
-    widgets::{Paragraph},
-    style::{Style,Color},
+    widgets::Paragraph,
     layout::{Layout, Constraint, Rect, 
         Direction::{Horizontal, Vertical}
     }, 
