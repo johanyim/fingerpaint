@@ -1,6 +1,3 @@
-extern crate serde;
-extern crate serde_yaml;
-
 use core::fmt;
 use serde::{Serialize,Deserialize};
 use csscolorparser::{self, ParseColorError};

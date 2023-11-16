@@ -1,10 +1,7 @@
-extern crate serde;
-extern crate serde_yaml;
-
 use csscolorparser::ParseColorError;
 use filenamify::filenamify;
 use serde::{Serialize,Deserialize};
-use std::{fs, path};
+use std::fs;
 use std::collections::HashMap;
 use std::io::{Write, BufReader};
 use std::path::PathBuf;
@@ -15,7 +12,6 @@ use crate::error::PaletteError::{
     PalettesPathNotFound, CouldNotFind, CouldNotParse};
 
 use ratatui::style::{Style, Color as RatatuiColor};
-use casual::confirm;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Palette {
@@ -123,6 +119,9 @@ impl Palette {
             None => "#000000".to_string(), 
         }    
     }
+    pub fn remove(&mut self, key: char) -> Option<Color>{
+        self.colors.remove(&key)
+    }
 
     pub fn get_rgba(&self, key: char) -> [u8;4] {
         let value = self.colors.get(&key);
@@ -132,9 +131,6 @@ impl Palette {
         }    
     }
 
-    pub fn remove(&mut self, key: char) -> Option<Color>{
-        self.colors.remove(&key)
-    }
 
     pub fn change_format(&mut self, key: char, format: Format) {
         if let Some(color) = self.colors.get_mut(&key) {

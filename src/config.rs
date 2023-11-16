@@ -1,8 +1,12 @@
-use std::{path::Path, ffi::OsString};
 use crate::error::ConfigError::{
     self, CouldNotParse, NotFound, NoConfigFolder, NoConfiguration};
 use casual::confirm;
-#[derive(serde::Deserialize)]
+
+use std::{path::Path, fs};
+use serde::{Deserialize, Serialize};
+use toml;
+
+#[derive(Debug, Serialize, Deserialize)]
 pub struct Config {
     /// path to palettes directory, Use default config is set to none
     pub palettes: Option<String>,
@@ -10,6 +14,7 @@ pub struct Config {
     pub auto_type: bool,
     pub copy_to_clipboard: bool,
     pub close_on_select: bool,
+    pub stdout: bool,
 }
 
 impl Default for Config {
@@ -21,6 +26,7 @@ impl Default for Config {
             auto_type: true,
             close_on_select: true,
             copy_to_clipboard: false,
+            stdout: true,
         }
     }
 }
@@ -40,14 +46,14 @@ impl Config {
 
         match parse_contents(contents) {
             Ok(config) => return Ok(config),
-            Err(e) => return prompt_use_default(),
+            Err(_) => return prompt_use_default(),
         }
     }
 }
 
 fn read_specified_path(pathstr: String) -> Result<String, ConfigError>{
     let path = Path::new(&pathstr);
-    match std::fs::read_to_string(path) {
+    match fs::read_to_string(path) {
         Err(_) => {
             eprintln!("Could not read the specified path: {pathstr}");
             return Err(NotFound(pathstr))
@@ -59,13 +65,14 @@ fn read_specified_path(pathstr: String) -> Result<String, ConfigError>{
 fn read_default_path() -> Result<String, ConfigError> {
     let pathstr: String = get_default_path()?;    
     let path = Path::new(&pathstr);
-    match std::fs::read_to_string(path) {
+    match fs::read_to_string(path) {
         Err(_) => {
             eprintln!("Could not read the default path: {pathstr}");
-            if confirm("Would you like to make a default configuration at {pathstr}?") {
-                todo!("Makes the config")
-            }
-            return Err(NotFound(pathstr)) },
+            // if confirm("Would you like to make a default configuration at {pathstr}?") {
+            //     todo!("Makes the config")
+            prompt_create(pathstr.clone())?;
+            return Ok(pathstr);
+        }
         Ok(contents) => return Ok(contents),
     };
 } // -c is unspecified use system default (created or not created)
@@ -84,6 +91,7 @@ fn get_default_path() -> Result<String, ConfigError> {
                        )
         },
     };
+    //XDG_CONFIG_HOME/fingerpaint/fingerpaint.toml
     let mut conf_path = std::path::PathBuf::new();
     conf_path.push(config_home);
     conf_path.push("fingerpaint");
@@ -109,8 +117,12 @@ fn parse_contents(contents: String) -> Result<Config, ConfigError> {
 
 fn prompt_create(pathstr: String) -> Result<(), ConfigError> {
     if confirm(format!("Would you like to create a default configuration file at {pathstr}?")){
-        todo!("makes default configuration");
-        // return Ok(Config::default());
+        let config = Config::default();
+        let toml_string = toml::to_string(&config)
+            .expect("Could not encode TOML value ");
+        fs::write(pathstr, toml_string)
+            .expect("Could not write to file");
+        return Ok(());
     } else {
         return Err(NoConfiguration);
     }

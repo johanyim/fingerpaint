@@ -36,8 +36,8 @@ impl<'a> Keyboard<'_> {
             keys, 
             offsets,
             layout: vec![],
-            key_height: 3,
-            key_width: 6,
+            key_height: 6,
+            key_width: 12,
         }
     }
 

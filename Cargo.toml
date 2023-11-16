@@ -9,6 +9,7 @@ anyhow = "1.0.75"
 casual = "0.2.0"
 clap = { version = "4.4.7", features = ["derive"] }
 colored = "2.0.4"
+copypasta = "0.10.0"
 copypasta-ext = "0.4.4"
 crossterm = "0.27.0"
 csscolorparser = "0.6.2"
