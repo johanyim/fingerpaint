@@ -5,8 +5,6 @@ mod error;
 mod palette;
 mod ui;
 
-use std::io::Write;
-
 use palette::Palette;
 use config::Config;
 use commands::*;
@@ -55,6 +53,4 @@ fn main() -> Result<()> {
     //exit gui
     Ok(())
 }
-
-
 

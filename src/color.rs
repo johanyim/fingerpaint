@@ -2,13 +2,13 @@ use core::fmt;
 use serde::{Serialize,Deserialize};
 use csscolorparser::{self, ParseColorError};
 
-
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Color{
     pub name: String, 
     pub output_format: Format,
     pub rgba_color: [u8; 4], 
 }
+
 
 impl Color {
     pub fn new(name: &str, format: Format, color: &str) -> Result<Self, ParseColorError>{
