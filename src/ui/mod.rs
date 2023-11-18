@@ -24,9 +24,11 @@ use ratatui::{
 use std::{rc::Rc, io::Stdout};
 use std::io::{stdout, Result};
 
-pub fn keyboard_selection(terminal: &mut Terminal, palette: &Palette) -> Result<Option<char>> {
+pub fn color_select(terminal: &mut Terminal, 
+              palettes: &mut Vec<Palette>, 
+              palette_index: &mut usize) -> Result<Option<char>> {
 
-    let selection: Result<Option<char>>;
+    // let selection: Result<Option<char>>;
 
     let keys = vec![
         "`1234567890-=", 
@@ -47,32 +49,34 @@ pub fn keyboard_selection(terminal: &mut Terminal, palette: &Palette) -> Result<
         terminal.draw(|frame| {
             // // this is for dynamically sizing keys
             // let kb_layout = layout_keys(frame.size(), keyboard.clone());
-            window.set_area(frame.size(), 1, 1);
-            kb.set_area(frame.size());
+            window.set_area(frame.size(), 3, 5);
+            kb.set_area(window.for_kb());
             
-            kb.render(frame, palette);
+            window.render(frame);
+            kb.render(frame, &palettes[*palette_index]);
         })?;
 
 
         //handle events
         if event::poll(std::time::Duration::from_millis(100))? {
             if let event::Event::Key(key) = event::read()? {
-                // if key.kind == KeyEventKind::Press && key.code == KeyCode::Char('q') {
                 if key.kind == KeyEventKind::Press {
-
                     if let KeyCode::Char(c) = key.code {
-                        selection = Ok(Some(c)); break
+                        return Ok(Some(c));
                     }
-                     
                     if let KeyCode::Esc = key.code {
-                        selection = Ok(None); break
+                        return Ok(None);
+                    }
+                    if let KeyCode::Right = key.code {
+                        *palette_index += 1;
+                    }
+                    if let KeyCode::Left = key.code {
+                        *palette_index -= 1; 
                     }
                 }
             }
         }
     }
-
-    return selection;
 }
 
 pub fn start_terminal() -> Result<Terminal> {

@@ -40,20 +40,18 @@ fn main() -> Result<()> {
     let config: Config = Config::build(config_arg)?;
     //loading palette
     // let mut palette = Palette::load(&config)?;
+    let mut palettes = Palette::load_all(&config)?; 
 
-    // match args.subcommand {
-    //     Some(Command::Set{key,color}) => { 
-    //         set(&config, &mut palette, key, color); },
-    //     Some(Command::Remove{key}) => { 
-    //         remove(&config, &mut palette, key); },
-    //     Some(Command::New{name}) => { 
-    //         new(&config, name)?; },
-    //     None => run(&config, &mut palette)?,
-    // }
-
-    println!("config = {:#?}", &config);
-    let palettes = Palette::load_all(&config); println!("complete");
-    println!("{:#?}", palettes);
+    let index = 1;
+    match args.subcommand {
+        Some(Command::Set{key,color}) => { 
+            set(&config, &mut palettes[index], key, color); },
+        Some(Command::Remove{key}) => { 
+            remove(&config, &mut palettes[index], key); },
+        Some(Command::New{name}) => { 
+            new(&config, name)?; },
+        None => run(&config, &mut palettes)?,
+    }
     //exit gui
     Ok(())
 }

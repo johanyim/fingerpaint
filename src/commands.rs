@@ -2,10 +2,7 @@ use crate::{
     palette::Palette, 
     config::Config,
     color::Format,
-};
-use crate::ui::{
-    start_terminal, restore_terminal, 
-    keyboard_selection
+    ui,
 };
 use anyhow::Result;
 use clap::Subcommand;
@@ -71,19 +68,18 @@ pub fn new(config: &Config, name: Option<String> ) -> Result<(), PaletteError> {
         None => casual::prompt("Name: ").default("Unnamed".to_string()).get(),
         Some(n) => n 
     };
-    let mut palette = Palette::new(&palettename);
-    let _ = run(&config, &mut palette);
-    palette.save(config)?;
+    let mut palettes = vec![Palette::new(&palettename)];
+    let _ = run(&config, &mut palettes);
+    palettes[1].save(config)?;
     Ok(())
 
 }
 // use copypasta::prelude::*;
-use std::process::{self, Stdio};
-use crate::ui;
-pub fn run(config: &Config, palette: &mut Palette) -> Result<()> {
+pub fn run(config: &Config, palettes: &mut Vec<Palette>) -> Result<()> {
     let mut terminal = ui::start_terminal()?;
+    let mut index = 1; //todo can define the index in config
     loop {
-        let input = ui::keyboard_selection(&mut terminal, &palette);
+        let input = ui::color_select(&mut terminal, palettes, &mut index);
 
         //copied to clipboard
         let mut ctx = ClipboardContext::new().unwrap();
@@ -91,7 +87,7 @@ pub fn run(config: &Config, palette: &mut Palette) -> Result<()> {
         if let Ok(keypress) = input {
             match keypress {
                 Some(c) => { 
-                    let to_copy = &palette.get_string(c);
+                    let to_copy = &palettes[index].get_string(c);
                     if config.copy_to_clipboard  {
                         ctx.set_contents(to_copy.to_owned())
                             .expect("should have copied to clipboard");

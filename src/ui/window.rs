@@ -6,7 +6,7 @@ use ratatui::{
         Direction::{Horizontal, Vertical}
     }, 
     Frame,
-    widgets::Tabs,
+    widgets::{Tabs, Block, Wrap},
 };
 use crate::palette::Palette;
 use std::{rc::Rc, path::Path};
@@ -49,7 +49,10 @@ impl Window {
 
         self.layout = v_contraints;
 
-        todo!(" top = Tabs::new()");
+                     
+                     
+
+        // todo!(" top = Tabs::new()");
 
         // self.layout.push(Rc::new([Rect::new(2, 2, 2, 2)]))
     }
@@ -61,6 +64,8 @@ impl Window {
     pub fn render(&self, frame: &mut Frame) {
         let titles = vec!["palette1", "palette2", "palette3"];
         frame.render_widget( Tabs::new(titles), self.layout[0]);
+        frame.render_widget( Paragraph::new("Press [esc] to exit")
+                             .alignment(Alignment::Center), self.layout[2])
     }
 
 
