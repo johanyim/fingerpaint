@@ -1,10 +1,12 @@
+pub mod reader;
+
 use csscolorparser::ParseColorError;
 use filenamify::filenamify;
 use serde::{Serialize,Deserialize};
-use std::fs;
+use std::fs::{self, DirEntry};
 use std::collections::HashMap;
 use std::io::{Write, BufReader};
-use std::path::PathBuf;
+use std::path::{PathBuf, Path};
 use crate::color::{self, Color, Format};
 use crate::config::Config;
 use crate::error::PaletteError::{
@@ -27,7 +29,8 @@ impl Default for Palette {
     }
 }
 
-impl Palette {
+impl Palette { 
+
     pub fn new(name: &str) -> Self {
         let colors: HashMap<char, Color> = HashMap::new();
         return Palette{name: name.to_string(), colors};
@@ -62,24 +65,13 @@ impl Palette {
         Ok(())
     }
 
-    pub fn load(config: &Config) -> Result<Palette, PaletteError> {
-        // let mut path = PathBuf::from(&config.palettes);
-        let mut path = match &config.palettes {
-            Some(plts) => PathBuf::from(plts),
-            None => return Ok(Palette::default()),
-        };
-        match &config.selected {
-            Some(plt) => path.push(filenamify(plt)),
-            None => return Ok(Palette::default()),
-        };
-        path.set_extension("yaml");
+    pub fn load(path: &Path) -> Result<Palette, PaletteError> {
 
-        let pathstring = path.as_path()
-            .to_str()
+        let pathstring = path.to_str()
             .unwrap_or("undefined")
             .to_string();
 
-        let file = match fs::File::open(path.as_path()) {
+        let file = match fs::File::open(path) {
             Ok(file) => file,
             Err(e) => return Err(CouldNotFind(e, pathstring)),
         };
@@ -90,7 +82,42 @@ impl Palette {
             Ok(file) => return Ok(file),
             Err(e) => return Err(CouldNotParse(e, pathstring)),
         };
+
+
+    }
+    pub fn load_selected(config: &Config) -> Result<Palette, PaletteError> {
+        // let mut path = PathBuf::from(&config.palettes);
+        let mut path = match &config.palettes {
+            Some(plts) => PathBuf::from(plts),
+            None => return Ok(Palette::default()),
+        };
+        match &config.selected {
+            Some(plt) => path.push(filenamify(plt)),
+            None => return Ok(Palette::default()),
+        };
+        path.set_extension("yaml");
+        return Palette::load(path.as_path());
+
     } 
+    pub fn load_all(config: &Config) -> Result<Vec<Palette>, PaletteError>{
+        // let palette_paths = fs::read_dir(&config.palettes)?;
+        
+        // This is "~/config/fingerpaint/palletes/"
+        let path = match &config.palettes {
+            Some(plts) => plts,
+            None => return Ok(vec![]),
+        };
+        
+        let palettes: Vec<Palette> = fs::read_dir(path).unwrap()
+            .into_iter()
+            .filter_map(|f| f.ok())
+            .map(|direntry| direntry.path())
+            .map(|path| Palette::load(&path)).filter_map(|f| f.ok())
+            .collect();
+
+        return Ok(palettes);
+    }
+
 
     pub fn set(&mut self, key: char, name: &str, 
                format: color::Format, content: &str 

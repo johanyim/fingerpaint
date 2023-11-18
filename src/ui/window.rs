@@ -8,18 +8,32 @@ use ratatui::{
     Frame,
     widgets::Tabs,
 };
-use std::rc::Rc;
+use crate::palette::Palette;
+use std::{rc::Rc, path::Path};
 pub struct Window {
     text: String,
     layout: Rc<[Rect]>,
+    palettes: Vec<Palette>
 }
 
+use std::fs;
 impl Window {
+
+    pub fn get_tabs(&mut self, path: &Path) {
+        
+        
+        let pathlist = fs::read_dir(path).unwrap();
+        for path in pathlist {
+            println!("{}", path.unwrap().path().display());
+        }
+
+    }
 
     pub fn new() -> Self {
         Window {
             text: "window".to_string(),
             layout: Rc::new([Rect::new(0,0,0,0)]),
+            palettes: vec![],
         }
     }
 
@@ -40,8 +54,16 @@ impl Window {
         // self.layout.push(Rc::new([Rect::new(2, 2, 2, 2)]))
     }
 
-    pub fn for_kb(self) -> Rect {
+    pub fn for_kb(&self) -> Rect {
         return self.layout[1];
     }
+    
+    pub fn render(&self, frame: &mut Frame) {
+        let titles = vec!["palette1", "palette2", "palette3"];
+        frame.render_widget( Tabs::new(titles), self.layout[0]);
+    }
+
+
+    
 
 }

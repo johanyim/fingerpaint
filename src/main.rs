@@ -11,6 +11,7 @@ use commands::*;
 
 use anyhow::Result;
 use clap::Parser;
+use ui::tabline::Tabline;
 
 
 #[derive(Parser)]
@@ -38,18 +39,21 @@ fn main() -> Result<()> {
 
     let config: Config = Config::build(config_arg)?;
     //loading palette
-    let mut palette = Palette::load(&config)?;
+    // let mut palette = Palette::load(&config)?;
 
-    match args.subcommand {
-        Some(Command::Set{key,color}) => { 
-            set(&config, &mut palette, key, color); },
-        Some(Command::Remove{key}) => { 
-            remove(&config, &mut palette, key); },
-        Some(Command::New{name}) => { 
-            new(&config, name)?; },
-        None => run(&config, &mut palette)?,
-    }
+    // match args.subcommand {
+    //     Some(Command::Set{key,color}) => { 
+    //         set(&config, &mut palette, key, color); },
+    //     Some(Command::Remove{key}) => { 
+    //         remove(&config, &mut palette, key); },
+    //     Some(Command::New{name}) => { 
+    //         new(&config, name)?; },
+    //     None => run(&config, &mut palette)?,
+    // }
 
+    println!("config = {:#?}", &config);
+    let palettes = Palette::load_all(&config); println!("complete");
+    println!("{:#?}", palettes);
     //exit gui
     Ok(())
 }

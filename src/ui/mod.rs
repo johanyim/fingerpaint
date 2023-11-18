@@ -1,7 +1,9 @@
 pub mod keyboard;
 pub mod window;
+pub mod tabline;
 use keyboard::Keyboard;
 use window::Window;
+use tabline::Tabline;
 
 use crate::palette::Palette;
 
@@ -45,6 +47,7 @@ pub fn keyboard_selection(terminal: &mut Terminal, palette: &Palette) -> Result<
         terminal.draw(|frame| {
             // // this is for dynamically sizing keys
             // let kb_layout = layout_keys(frame.size(), keyboard.clone());
+            window.set_area(frame.size(), 1, 1);
             kb.set_area(frame.size());
             
             kb.render(frame, palette);
