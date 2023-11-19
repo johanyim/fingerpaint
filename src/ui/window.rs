@@ -49,11 +49,6 @@ impl Window {
 
         self.layout = v_contraints;
 
-                     
-                     
-
-        // todo!(" top = Tabs::new()");
-
         // self.layout.push(Rc::new([Rect::new(2, 2, 2, 2)]))
     }
 
@@ -62,6 +57,7 @@ impl Window {
     }
     
     pub fn render(&self, frame: &mut Frame) {
+        todo!("make functioning tab line");
         let titles = vec!["palette1", "palette2", "palette3"];
         frame.render_widget( Tabs::new(titles), self.layout[0]);
         frame.render_widget( Paragraph::new("Press [esc] to exit")

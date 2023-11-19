@@ -8,7 +8,6 @@ use ratatui::{
     Frame,
 };
 use std::rc::Rc;
-
 pub struct Keyboard<'a> {
     keys: Vec<&'a str>,
     offsets: Vec<u16>,
