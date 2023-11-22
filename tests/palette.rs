@@ -1,10 +1,10 @@
 use csscolorparser::{self,Color};
-use qolor::palette::Palette;
-use qolor::color;
+use fingerpaint::palette::Palette;
+use fingerpaint::color;
 
 #[cfg(test)]
 mod tests {
-    use qolor::color::Color;
+    use fingerpaint::color::Color;
 
     use super::*;
 

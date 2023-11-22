@@ -1,6 +1,6 @@
 #[cfg(test)]
 mod tests {
-    // use qolor::palette::Palette;
+    // use fingerpaint::palette::Palette;
     //
     // use super::*;
 
